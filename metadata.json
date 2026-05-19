@@ -1,0 +1,6 @@
+{
+  "name": "Lumina Captions",
+  "description": "On-device AI video captioning tool for short-form content. 100% private, no server required.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
