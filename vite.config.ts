@@ -9,6 +9,12 @@ export default defineConfig(() => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
+        // Full `ort-web` bundle contains an `eval` workaround for bundlers; Rollup warns and CSP can block it.
+        // We only use the WASM execution provider (see @xenova/transformers backends/onnx.js), so alias to WASM-only build.
+        'onnxruntime-web': path.resolve(
+          __dirname,
+          'node_modules/onnxruntime-web/dist/ort.wasm.min.js',
+        ),
       },
     },
     server: {
