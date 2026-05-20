@@ -45,11 +45,88 @@ self.onmessage = async (event) => {
     
     self.postMessage({ status: 'processing', message: 'Transcribing audio...', progress: 100 });
     
-    const result = await pipe(audioData, {
-      chunk_length_s: 30,
-      stride_length_s: 5,
-      return_timestamps: 'word',
-    });
+    const SAMPLE_RATE = 16000;
+    const MAX_CHUNK_SIZE = 30 * SAMPLE_RATE;
+    const allChunks: any[] = [];
+    const totalChunksEstimate = Math.ceil(audioData.length / MAX_CHUNK_SIZE);
+    let chunkIndex = 0;
+
+    // Helper to find a quiet point in the audio to avoid cutting words in half
+    function findQuietCutPoint(audio: Float32Array, currentOffset: number): number {
+      if (currentOffset + MAX_CHUNK_SIZE >= audio.length) {
+        return audio.length - currentOffset; // Last chunk, just take the rest
+      }
+
+      // Search for a quiet spot in the last 5 seconds of the 30s chunk
+      const searchSearchSamples = 5 * SAMPLE_RATE;
+      const windowSize = Math.floor(0.2 * SAMPLE_RATE); // 200ms window
+      let minEnergy = Infinity;
+      let bestCutPoint = MAX_CHUNK_SIZE;
+
+      for (let i = MAX_CHUNK_SIZE - windowSize; i >= MAX_CHUNK_SIZE - searchSearchSamples && i >= 0; i -= Math.floor(windowSize / 2)) {
+        let energy = 0;
+        for (let j = 0; j < windowSize; j++) {
+          energy += Math.abs(audio[currentOffset + i + j]);
+        }
+        if (energy < minEnergy) {
+          minEnergy = energy;
+          bestCutPoint = i + Math.floor(windowSize / 2); // Cut in the middle of the quietest window
+        }
+      }
+      return bestCutPoint;
+    }
+
+    // Manually chunk because Transformers.js word timestamps logic drops chunks > 30s
+    for (let offset = 0; offset < audioData.length;) {
+      const progress = Math.min(99, Math.round((chunkIndex / totalChunksEstimate) * 100));
+      self.postMessage({ 
+        status: 'processing', 
+        message: `Transcribing audio (${progress}%)...`, 
+        progress 
+      });
+
+      const actualChunkSize = findQuietCutPoint(audioData, offset);
+      const chunkAudio = audioData.slice(offset, offset + actualChunkSize);
+      const timeOffset = offset / SAMPLE_RATE;
+      const actualChunkDuration = actualChunkSize / SAMPLE_RATE;
+      
+      const chunkResult = await pipe(chunkAudio, {
+        return_timestamps: 'word',
+      });
+      
+      if (chunkResult.chunks) {
+        for (const c of chunkResult.chunks) {
+          const start = c.timestamp[0];
+          let end = c.timestamp[1];
+
+          // Whisper pads chunkAudio to 30s. Ignore words hallucinated in the pad.
+          if (start !== null && start >= actualChunkDuration) {
+            continue;
+          }
+
+          // Clamp the end time of the last word to the exact cut point
+          if (end !== null && end > actualChunkDuration) {
+            end = actualChunkDuration;
+          }
+
+          allChunks.push({
+            text: c.text,
+            timestamp: [
+              start !== null ? start + timeOffset : null,
+              end !== null ? end + timeOffset : null
+            ]
+          });
+        }
+      }
+
+      offset += actualChunkSize;
+      chunkIndex++;
+    }
+
+    const result = { 
+      text: allChunks.map(c => c.text).join('').trim(), 
+      chunks: allChunks 
+    };
 
     self.postMessage({ status: 'done', result });
   } catch (error: any) {
