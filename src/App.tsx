@@ -29,6 +29,7 @@ import {
   Pipette,
   Save,
   Edit2
+  , Coffee, Scissors, Zap, FileVideo, Github
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -57,7 +58,7 @@ export default function App() {
   const [isEditorOpen, setIsEditorOpen] = useState(true); // Mobile drawer state
   const [rawWords, setRawWords] = useState<any[]>([]);
   
-  const [activePage, setActivePage] = useState<'app' | 'privacy' | 'terms'>('app');
+  const [activePage, setActivePage] = useState<'app' | 'about' | 'privacy' | 'terms'>('app');
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     type: 'save' | 'rename' | 'delete';
@@ -67,6 +68,8 @@ export default function App() {
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const workerRef = useRef<Worker | null>(null);
+
+  const isEditor = status === 'editing' || status === 'exporting';
 
   useEffect(() => {
     const stored = localStorage.getItem('userPresets');
@@ -476,164 +479,275 @@ export default function App() {
     });
   };
 
-  if (activePage === 'about') {
-    return (
-      <div className="min-h-screen bg-black text-white p-8 md:p-12 font-sans">
-        <div className="max-w-3xl mx-auto">
-          <button onClick={() => setActivePage('app')} className="mb-8 flex items-center gap-2 px-3 py-1.5 rounded-full border border-orange-500 text-orange-500 bg-transparent hover:bg-orange-500 hover:text-white transition-colors w-fit">
-            ← Back to App
-          </button>
-          
-          <h1 className="text-4xl font-display font-medium mb-8">About Me</h1>
-          
-          <div className="space-y-6 text-white/80 leading-relaxed">
-            <p className="text-lg">Hi, I'm <strong className="text-white">John Adams</strong>, the creator of Lumina Captions.</p>
-            
-            <p>
-              I built this software because I was tired of seeing creators and small business owners 
-              get price-gouged by big, greedy corporations charging an arm and a leg for simple video captioning. 
-              Tools like this shouldn't be locked behind expensive monthly subscriptions. 
-              That's why Lumina Captions is fully free, runs directly on your device, respects your privacy, 
-              and has absolutely no watermarks.
-            </p>
-            
-            <p>
-              I'm a software developer and designer focused on building practical tools that actually help 
-              you succeed without draining your wallet. I run <a href="https://leftystudios.com" target="_blank" rel="noopener noreferrer" className="text-orange-500 hover:text-orange-400 underline">Lefty Studios</a>, 
-              where my mission is to help you create better images and videos to drive better sales.
-            </p>
-            
-            <p>
-              This is just the beginning. If you believe software should empower creators, not exploit them, 
-              I invite you to join me on this journey.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 pt-4 mt-8">
-              <a 
-                href="https://buymeacoffee.com/john.adams" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="bg-[#FFDD00] text-black px-6 py-3 rounded-full font-medium inline-flex items-center justify-center gap-2 hover:bg-[#FFDD00]/90 transition-colors shadow-lg animate-coffee-shake"
-              >
-                ☕ Buy me a coffee
-              </a>
-              <a
-                href="https://leftystudios.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white/10 text-white border border-white/20 px-6 py-3 rounded-full font-medium inline-flex items-center justify-center hover:bg-white/20 transition-colors"
-              >
-                Visit Lefty Studios
-              </a>
-              <a
-                href="https://www.linkedin.com/in/johneadams88/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-[#0A66C2] text-white px-6 py-3 rounded-full font-medium inline-flex items-center justify-center hover:bg-[#0A66C2]/90 transition-colors"
-              >
-                Connect on LinkedIn
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
-  if (activePage === 'privacy') {
-    return (
-      <div className="min-h-screen bg-black text-white p-8 md:p-12 font-sans">
-        <div className="max-w-3xl mx-auto">
-          <button onClick={() => setActivePage('app')} className="mb-8 flex items-center gap-2 px-3 py-1.5 rounded-full border border-orange-500 text-orange-500 bg-transparent hover:bg-orange-500 hover:text-white transition-colors w-fit">
-            ← Back to App
-          </button>
-          <h1 className="text-4xl font-display font-medium mb-8">Privacy Policy</h1>
-          <div className="space-y-6 text-white/80 leading-relaxed">
-            <p>Your privacy is important to us. Lumina Captions operates locally on your device.</p>
-            <h2 className="text-2xl font-display text-white mt-8 mb-4">1. Data Processing</h2>
-            <p>All audio extraction, transcription, and video rendering processes occur entirely on your local device. We do not upload your videos, audio, or text to any external servers.</p>
-            <h2 className="text-2xl font-display text-white mt-8 mb-4">2. Local Storage</h2>
-            <p>We use your browser's local storage to save your custom caption presets. This data remains on your device and is not synchronized with any cloud service.</p>
-            <h2 className="text-2xl font-display text-white mt-8 mb-4">3. Third-Party Services</h2>
-            <p>Since the application runs locally, no third-party analytics or tracking services are integrated into the transcription process.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (activePage === 'terms') {
-    return (
-      <div className="min-h-screen bg-black text-white p-8 md:p-12 font-sans">
-        <div className="max-w-3xl mx-auto">
-          <button onClick={() => setActivePage('app')} className="mb-8 flex items-center gap-2 px-3 py-1.5 rounded-full border border-orange-500 text-orange-500 bg-transparent hover:bg-orange-500 hover:text-white transition-colors w-fit">
-            ← Back to App
-          </button>
-          <h1 className="text-4xl font-display font-medium mb-8">Terms of Use</h1>
-          <div className="space-y-6 text-white/80 leading-relaxed">
-            <p>By using Lumina Captions, you agree to these Terms of Use.</p>
-            <h2 className="text-2xl font-display text-white mt-8 mb-4">1. Use of Service</h2>
-            <p>Lumina Captions is provided "as is" without warranty of any kind. You are responsible for the content you process using this application.</p>
-            <h2 className="text-2xl font-display text-white mt-8 mb-4">2. Processing Capabilities</h2>
-            <p>Because the app relies on your device's hardware for transcription and rendering, performance may vary based on your device specifications.</p>
-            <h2 className="text-2xl font-display text-white mt-8 mb-4">3. Prohibited Uses</h2>
-            <p>You may not use this tool to violate the intellectual property rights of others or to generate illegal content. You retain all rights to the videos you process.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
+    <div className="h-screen bg-brand-charcoal text-brand-white font-sans selection:bg-brand-orange overflow-hidden flex flex-col">
+      <header className="h-16 flex items-center justify-between px-8 border-b border-brand-orange/20 shrink-0 sticky top-0 z-50 bg-brand-header-black/90 backdrop-blur-md">
+        <button onClick={() => setActivePage('app')} className="flex items-center gap-4 group">
+          <div className="w-8 h-8 bg-brand-orange rounded flex items-center justify-center group-hover:scale-105 transition-transform">
+            <Scissors className="w-5 h-5 text-brand-black" />
+          </div>
+          <h1 className="text-xl font-bold tracking-tight uppercase italic text-brand-white flex gap-1">Lumina<span className="text-brand-orange">Captions</span></h1>
+        </button>
+        <a
+          href="https://buymeacoffee.com/john.adams"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hidden sm:inline-flex items-center justify-center gap-2 rounded bg-brand-orange px-5 py-2 text-sm font-semibold text-brand-header-black shadow-[0_0_18px_rgba(243,121,27,0.25)] transition hover:bg-brand-600"
+        >
+          <Coffee className="w-4 h-4" />
+          <span>Buy Me A Coffee</span>
+        </a>
+      </header>
+
+      <div className={`flex-1 w-full ${isEditor ? 'overflow-hidden flex flex-col' : 'overflow-y-auto flex flex-col'}`}>
       <AnimatePresence mode="wait">
-        {status === 'idle' && (
-          <motion.div 
+        {status === 'idle' && activePage === 'app' && (
+          <motion.div
             key="landing"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="max-w-4xl mx-auto px-6 py-24 flex flex-col items-center text-center"
+            className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center text-center px-6 py-20 relative overflow-hidden"
           >
-            <div className="mb-8 p-3 bg-white/5 rounded-2xl border border-white/10">
-              <Sparkles className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-6xl md:text-8xl font-display font-medium tracking-tight mb-8">
-              Lumina <span className="text-orange-500">Captions</span>
-            </h1>
-            <p className="text-xl md:text-2xl text-white/60 mb-12 max-w-2xl leading-relaxed">
-              Transform your videos with on-device AI. 
-              Pure privacy, professional styles, zero server lag.
-            </p>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(243,121,27,0.16),transparent_42%)] pointer-events-none" />
 
-            <label className="group relative cursor-pointer overflow-hidden rounded-full bg-orange-500 px-12 py-5 text-white font-semibold transition-transform hover:scale-105 hover:bg-orange-400 active:scale-95">
-              <span className="relative z-10 text-lg flex items-center gap-3">
-                <Upload className="w-5 h-5" />
-                Upload 9:16 Video
-              </span>
-              <input type="file" className="hidden" accept="video/*" onChange={handleFileUpload} />
-            </label>
-            
-            <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
-              {[
-                { icon: <Loader2 className="w-5 h-5" />, title: 'Local Processing', desc: 'Captions generated on your device.' },
-                { icon: <Type className="w-5 h-5" />, title: 'Premium Styles', desc: 'Vibrant presets for social media.' },
-                { icon: <CheckCircle2 className="w-5 h-5" />, title: 'High Res Export', desc: 'No watermarks, no quality loss.' },
-              ].map((feature, i) => (
-                <div key={i} className="text-left p-6 rounded-3xl bg-white/5 border border-white/10">
-                  <div className="mb-4 text-white/40">{feature.icon}</div>
-                  <h3 className="font-medium text-lg mb-2">{feature.title}</h3>
-                  <p className="text-white/40 text-sm leading-relaxed">{feature.desc}</p>
-                </div>
-              ))}
+            <div className="relative z-10 max-w-4xl mx-auto space-y-8">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-grey/70 border border-brand-orange/25 text-brand-orange text-sm font-medium mb-4">
+                <Zap className="w-4 h-4" />
+                <span>100% Local, Browser-by-Browser Processing</span>
+              </div>
+              
+              <h1 className="text-5xl md:text-7xl font-bold text-brand-white tracking-tight leading-tight">
+                Lumina Captions. <br />
+                <span className="text-brand-orange italic">Pro captions.</span>
+              </h1>
+              
+              <p className="text-lg md:text-xl text-brand-white/70 max-w-2xl mx-auto leading-relaxed">
+                Transform your videos with on-device AI. Pure privacy, professional styles, zero server lag.
+              </p>
+
+              <div className="pt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <label
+                  className="group relative cursor-pointer overflow-hidden rounded-lg bg-brand-orange px-8 py-4 text-brand-white font-bold uppercase tracking-widest transition shadow-[0_0_30px_rgba(243,121,27,0.3)] w-full sm:w-auto flex items-center gap-2 justify-center text-lg"
+                >
+                  <Upload className="w-6 h-6" />
+                  <span>Upload Video</span>
+                  <input type="file" className="hidden" accept="video/*" onChange={handleFileUpload} />
+                </label>
+
+                <a
+                  href="https://github.com/Fr0z3nRebel/lumina-captions"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-8 py-4 bg-brand-grey hover:bg-brand-grey/80 text-brand-white font-bold uppercase tracking-widest rounded-lg transition border border-brand-orange/20 w-full sm:w-auto justify-center text-lg"
+                >
+                  <Github className="w-6 h-6" />
+                  <span>View on GitHub</span>
+                </a>
+              </div>
             </div>
-            
-            <div className="mt-24 flex items-center justify-center gap-6 text-sm text-white/40">
-              <button onClick={() => setActivePage('about')} className="hover:text-orange-500 transition-colors">About</button>
-              <span>•</span>
-              <button onClick={() => setActivePage('privacy')} className="hover:text-orange-500 transition-colors">Privacy Policy</button>
-              <span>•</span>
-              <button onClick={() => setActivePage('terms')} className="hover:text-orange-500 transition-colors">Terms of Use</button>
+
+            {/* Feature section */}
+            <div id="features" className="relative z-10 mt-32 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto w-full text-left">
+              <div className="bg-brand-grey/55 border border-brand-orange/15 rounded-2xl p-8 hover:bg-brand-grey/75 transition">
+                <div className="w-12 h-12 bg-brand-orange/20 rounded-xl flex items-center justify-center mb-6 text-brand-orange">
+                  <FileVideo className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold text-brand-white mb-3">1. Upload Video</h3>
+                <p className="text-brand-white/65">Load any MP4 video directly into your browser. Your files never leave your computer.</p>
+              </div>
+              
+              <div className="bg-brand-grey/55 border border-brand-orange/15 rounded-2xl p-8 hover:bg-brand-grey/75 transition">
+                <div className="w-12 h-12 bg-brand-orange/20 rounded-xl flex items-center justify-center mb-6 text-brand-orange">
+                  <Zap className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold text-brand-white mb-3">2. Auto-Detect</h3>
+                <p className="text-brand-white/65">Our audio analyzer pinpoints exact moments of speech for accurate captions.</p>
+              </div>
+
+              <div className="bg-brand-grey/55 border border-brand-orange/15 rounded-2xl p-8 hover:bg-brand-grey/75 transition">
+                <div className="w-12 h-12 bg-brand-orange/20 rounded-xl flex items-center justify-center mb-6 text-brand-orange">
+                  <Type className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold text-brand-white mb-3">3. Export & Download</h3>
+                <p className="text-brand-white/65">Preview and export captioned video or subtitle files without server uploads.</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {status === 'idle' && activePage === 'about' && (
+          <motion.div
+            key="about"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="min-h-[calc(100vh-64px)] bg-brand-charcoal text-brand-white px-6 py-12 md:px-12"
+          >
+            <div className="max-w-3xl mx-auto">
+              <button
+                onClick={() => setActivePage('app')}
+                className="mb-8 flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand-orange text-brand-orange bg-transparent hover:bg-brand-orange hover:text-brand-white transition-colors w-fit"
+              >
+                <span aria-hidden="true">&larr;</span>
+                <span>Back to App</span>
+              </button>
+
+              <h1 className="text-4xl font-medium mb-8 tracking-tight">About Me</h1>
+
+              <div className="space-y-6 text-brand-white/80 leading-relaxed">
+                <p className="text-lg">
+                  Hi, I'm <strong className="text-brand-white">John Adams</strong>, the creator of Lumina Captions.
+                </p>
+
+                <p>
+                  I built this software because I was tired of seeing creators and small business owners
+                  get price-gouged by big, greedy corporations charging an arm and a leg for simple video captioning.
+                  Tools like this shouldn't be locked behind expensive monthly subscriptions.
+                </p>
+                <p>
+                  That's why Lumina Captions is fully free, runs directly on your device, respects your privacy,
+                  and has absolutely no watermarks.
+                </p>
+
+                <p>
+                  I run{' '}
+                  <a
+                    href="https://leftystudios.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-brand-orange hover:text-brand-200 underline"
+                  >
+                    Lefty Studios
+                  </a>
+                  , where my mission is to help you create better images and videos to drive better sales.
+                </p>
+
+                <p>
+                  Lumina Captions is part of that larger idea: software should empower creators, not exploit them.
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-4 pt-4 mt-8">
+                  <a
+                    href="https://buymeacoffee.com/john.adams"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-[#FFDD00] text-brand-black px-6 py-3 rounded-full font-medium inline-flex items-center justify-center hover:bg-[#FFDD00]/90 transition-colors shadow-lg"
+                  >
+                    Buy me a coffee
+                  </a>
+                  <a
+                    href="https://leftystudios.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-brand-grey text-brand-white border border-brand-orange/20 px-6 py-3 rounded-full font-medium inline-flex items-center justify-center hover:bg-brand-grey/80 transition-colors"
+                  >
+                    Visit Lefty Studios
+                  </a>
+                  <a
+                    href="https://www.linkedin.com/in/johneadams88/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-[#0A66C2] text-white px-6 py-3 rounded-full font-medium inline-flex items-center justify-center hover:bg-[#0A66C2]/90 transition-colors"
+                  >
+                    Connect on LinkedIn
+                  </a>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {status === 'idle' && activePage === 'privacy' && (
+          <motion.div
+            key="privacy"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="min-h-[calc(100vh-64px)] bg-brand-charcoal text-brand-white px-6 py-12 md:px-12"
+          >
+            <div className="max-w-3xl mx-auto">
+              <button
+                onClick={() => setActivePage('app')}
+                className="mb-8 flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand-orange text-brand-orange bg-transparent hover:bg-brand-orange hover:text-brand-white transition-colors w-fit"
+              >
+                <span aria-hidden="true">&larr;</span>
+                <span>Back to App</span>
+              </button>
+
+              <h1 className="text-3xl font-bold text-brand-white mb-8 tracking-tight">Privacy Policy</h1>
+              
+              <div className="space-y-6 text-brand-white/75 leading-relaxed">
+                <p>Effective Date: {new Date().toLocaleDateString()}</p>
+                
+                <h2 className="text-xl font-bold text-brand-white mt-8 mb-4">1. Information We Collect</h2>
+                <p>
+                  We do not collect or store your videos. All processing happens locally within your browser using WebAssembly.
+                </p>
+
+                <h2 className="text-xl font-bold text-brand-white mt-8 mb-4">2. Processing of Media</h2>
+                <p>
+                  When you upload a video, the analysis and rendering operations run directly on your device. We do not upload, share, or store your original or processed files on any external servers.
+                </p>
+
+                <h2 className="text-xl font-bold text-brand-white mt-8 mb-4">3. Local Storage</h2>
+                <p>
+                  We use your browser's local storage to save your custom caption presets. This data remains on your device and is not synchronized with any cloud service.
+                </p>
+
+                <h2 className="text-xl font-bold text-brand-white mt-8 mb-4">4. Changes to this Policy</h2>
+                <p>
+                  We may update our Privacy Policy periodically. We encourage you to review this page occasionally for any changes.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {status === 'idle' && activePage === 'terms' && (
+          <motion.div
+            key="terms"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="min-h-[calc(100vh-64px)] bg-brand-charcoal text-brand-white px-6 py-12 md:px-12"
+          >
+            <div className="max-w-3xl mx-auto">
+              <button
+                onClick={() => setActivePage('app')}
+                className="mb-8 flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand-orange text-brand-orange bg-transparent hover:bg-brand-orange hover:text-brand-white transition-colors w-fit"
+              >
+                <span aria-hidden="true">&larr;</span>
+                <span>Back to App</span>
+              </button>
+
+              <h1 className="text-3xl font-bold text-brand-white mb-8 tracking-tight">Terms of Service</h1>
+              
+              <div className="space-y-6 text-brand-white/75 leading-relaxed">
+                <p>Effective Date: {new Date().toLocaleDateString()}</p>
+
+                <h2 className="text-xl font-bold text-brand-white mt-8 mb-4">1. Acceptance of Terms</h2>
+                <p>
+                  By accessing and using this service, you accept and agree to be bound by the terms and provision of this agreement.
+                </p>
+
+                <h2 className="text-xl font-bold text-brand-white mt-8 mb-4">2. Use of Service</h2>
+                <p>
+                  This service provides browser-based video captioning. Because processing happens locally on your device, performance may vary depending on your hardware. We provide the service "as is", without any warranties.
+                </p>
+
+                <h2 className="text-xl font-bold text-brand-white mt-8 mb-4">3. User Responsibilities</h2>
+                <p>
+                  You are solely responsible for the media you process. You agree not to use the service for any illegal or unauthorized purpose.
+                </p>
+
+                <h2 className="text-xl font-bold text-brand-white mt-8 mb-4">4. Intellectual Property</h2>
+                <p>
+                  We claim no intellectual property rights over the media you provide to the service. Your material remains yours.
+                </p>
+              </div>
             </div>
           </motion.div>
         )}
@@ -794,14 +908,14 @@ export default function App() {
 
               {/* Buy Me A Coffee Button under video */}
               <div className="flex flex-col items-center gap-2 pt-6">
-                <span className="text-sm text-white/60 italic">If you enjoyed this app</span>
+                <span className="text-sm text-brand-white/60 italic">If you enjoyed this app</span>
                 <a 
                   href="https://buymeacoffee.com/john.adams" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="bg-transparent border border-orange-500 text-orange-500 px-6 py-2.5 rounded-full font-medium flex items-center gap-2 hover:bg-orange-500 hover:text-white transition-colors shadow-lg animate-coffee-shake"
+                  className="bg-transparent border border-brand-orange text-brand-orange px-6 py-2.5 rounded-full font-medium flex items-center gap-2 hover:bg-brand-orange hover:text-brand-black transition shadow-lg"
                 >
-                  ☕ Buy me a coffee
+                  <span>Buy me a coffee</span>
                 </a>
               </div>
 
@@ -1259,6 +1373,21 @@ export default function App() {
         )}
       </AnimatePresence>
 
+        {!isEditor && (
+          <footer className="border-t border-brand-orange/20 py-8 px-8 mt-auto box-border">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-brand-white/55">
+              <div>
+                &copy; {new Date().getFullYear()} Lefty Studios, LLC. All rights reserved.
+              </div>
+              <div className="flex items-center gap-6">
+                <button onClick={() => setActivePage('about')} className="hover:text-brand-orange transition">About</button>
+                <button onClick={() => setActivePage('privacy')} className="hover:text-brand-orange transition">Privacy Policy</button>
+                <button onClick={() => setActivePage('terms')} className="hover:text-brand-orange transition">Terms of Service</button>
+              </div>
+            </div>
+          </footer>
+        )}
+
       {/* Preset Modal Overlay */}
       {modalState.isOpen && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] backdrop-blur-sm p-4">
@@ -1337,6 +1466,7 @@ export default function App() {
         </div>
       )}
     </div>
+  </div>
   );
 }
 
