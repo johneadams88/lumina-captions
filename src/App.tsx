@@ -1,11 +1,6 @@
 /**
  * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-License-Identifier: MIT
  */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
